@@ -16,8 +16,8 @@ class DistanceReward(Reward):
 
         distance_to_target = np.linalg.norm(target_position - obstacle_position)
 
-        reward = (-distance_to_target) * 100  + (-distance_to_endeffector * 10)
+        reward = (1 / distance_to_target) * 10  + (1 / distance_to_endeffector * 1)
 
         print(f"🎁 Reward: {reward}")
-        return reward
+        return reward.astype(int)
     
