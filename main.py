@@ -15,7 +15,7 @@ from gymnasium.wrappers import FlattenObservation
 
 
 robots = [
-    GenericUrdfReacher(urdf="panda_with_gripper.urdf", mode="tor"),
+    GenericUrdfReacher(urdf="panda_with_gripper.urdf", mode="vel"),
 ]
 
 render: bool = False
@@ -25,46 +25,28 @@ sensor = FullSensor(['position'], ['position', 'size'], variance=0.0)
 from urdfenvs.wrappers.sb3_float32_action_wrapper import SB3Float32ActionWrapper
 from normalize_action import MapActionWrapper
 from gymnasium.wrappers import TimeLimit
+from forwardkinematics.urdfFks.pandaFk import PandaFk
 
 roboticsEnv = UrdfEnv(render=render, robots=robots)
 roboticsEnv.add_sensor(sensor, [0])
 roboticsEnv.add_obstacle(movable_obstacle)
-roboticsEnv.set_reward_calculator(DistanceReward())
+
+fk_panda = PandaFk()
+roboticsEnv.set_reward_calculator(DistanceReward(fk_panda=fk_panda))
 roboticsEnv.set_spaces()
 ob, *_ = roboticsEnv.reset()
 
 roboticsEnv = FlattenObservation(roboticsEnv)
 roboticsEnv = SB3Float32ActionWrapper(roboticsEnv)
 roboticsEnv = MapActionWrapper(roboticsEnv)
-roboticsEnv = TimeLimit(env=roboticsEnv, max_episode_steps= 250)
+roboticsEnv = TimeLimit(env=roboticsEnv, max_episode_steps= 500)
 
-# roboticsEnv1 = UrdfEnv(render=render, robots=robots)
-# roboticsEnv1.add_sensor(sensor, [0])
-# roboticsEnv1.add_obstacle(movable_obstacle)
-# roboticsEnv1.set_reward_calculator(DistanceReward())
-# roboticsEnv1.set_spaces()
-# ob, *_ = roboticsEnv1.reset()
-
-# roboticsEnv1 = FlattenObservation(roboticsEnv1)
-# roboticsEnv1 = SB3Float32ActionWrapper(roboticsEnv1)
-# roboticsEnv1 = MapActionWrapper(roboticsEnv1)
-# roboticsEnv1 = TimeLimit(env=roboticsEnv1, max_episode_steps= 250)
-
-
-
-# env = gym.vector.SyncVectorEnv([
-#     lambda: roboticsEnv, 
-#     lambda: roboticsEnv1,
-# ])
 
 MODEL_NAME = 'TD3-001'
 MODEL_CLASS = TD3
 
-models_dir = 'models/' + MODEL_NAME
 logdir = 'tb_logs'
 
-if not os.path.exists(models_dir):
-    os.makedirs(models_dir)
 
 if not os.path.exists(logdir):
     os.makedirs(logdir)
@@ -90,7 +72,7 @@ model = MODEL_CLASS("MlpPolicy",
                     buffer_size= 2_000_000,
                     # gamma= 0.99, # Discount Factor 
                     # action_noise=action_noise, 
-                    device='cuda',
+                    device='cpu',
                 )
 
 TIMESTEPS = 1_000_000
