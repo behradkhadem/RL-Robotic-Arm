@@ -3,8 +3,8 @@ from urdfenvs.sensors.full_sensor import FullSensor
 from urdfenvs.urdf_common import UrdfEnv
 import os
 import gymnasium as gym
-from reward import DistanceReward
-from object import movable_obstacle
+from panda.reward import DistanceReward
+from panda.object import movable_obstacle
 
 
 # Stable baselines 3
@@ -23,7 +23,7 @@ sensor = FullSensor(['position'], ['position', 'size'], variance=0.0)
 
 
 from urdfenvs.wrappers.sb3_float32_action_wrapper import SB3Float32ActionWrapper
-from normalize_action import MapActionWrapper
+from panda.normalize_action import MapActionWrapper
 from gymnasium.wrappers import TimeLimit
 from forwardkinematics.urdfFks.pandaFk import PandaFk
 

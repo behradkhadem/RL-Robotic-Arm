@@ -24,7 +24,7 @@ class DistanceReward(Reward):
 
         # reward = (1 / distance_to_target) * 10  + (1 / distance_to_endeffector * 1)
 
-        reward = -10 * distance_to_target - distance_to_endeffector
+        reward = -10_000 * distance_to_target - 1_000 * distance_to_endeffector
 
         print(f"🎁 Reward: {reward}")
         return reward.astype(int)
